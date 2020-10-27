@@ -1,0 +1,72 @@
+[HttpGet]
+        public ActionResult upload(string ClientId)
+        {
+
+            ViewBag.n = ClientId;
+            ViewBag.n = ClientId;
+            ViewBag.n = ClientId;
+            var name = db.NewEstates.ToList().Where(x => x.ClientId == ClientId).SingleOrDefault().FirstName;
+            ViewBag.clientName = "Upload file for " + name.ToUpper();
+            var clientdata = new ClientFileUploaded
+            {
+                ClientId = ClientId,
+                ClientName = name
+
+            };
+            return View(clientdata);
+        }
+
+        [HttpPost]
+        public ActionResult upload(string ClientId, ClientFileUploaded clientFileUploaded, HttpPostedFileBase image1)
+        {
+            string filename = "";
+            if (image1 != null)
+            {
+                clientFileUploaded.File = new byte[image1.ContentLength];
+                image1.InputStream.Read(clientFileUploaded.File, 0, image1.ContentLength);
+                filename = image1.FileName;
+                clientFileUploaded.FileName = image1.FileName;
+            }
+            var name = db.NewEstates.ToList().Where(x => x.ClientId == ClientId).SingleOrDefault().FirstName;
+
+            var ee = new ClientFileUploaded()
+            {
+                ClientId = ClientId,
+                ClientName = name,
+                FileName = filename
+            };
+            db.ClientFileUploaded.Add(clientFileUploaded);
+            db.SaveChanges();
+            ViewBag.ms = "Saved";
+            return View();//.WithNotification(Status.Error, "Sorry We could not find the patient you're looking for "); ;
+
+        }
+
+
+
+        public ActionResult AllFiles(string ClientId)
+        {
+            var all = db.ClientFileUploaded.ToList().Where(x => x.ClientId == ClientId);
+
+            return View(all);
+        }
+
+        public ActionResult Download(int? id)
+        {
+            Response.AppendHeader("Content-Disposition", Header(id.Value));
+            return new FileStreamResult(new MemoryStream(db.ClientFileUploaded.Find(id.Value).File), db.ClientFileUploaded.Find(id.Value).FileName);
+
+        }
+        public string Header(int id)
+        {
+            var Filerepo = db.ClientFileUploaded.ToList();
+
+            var fileRecord = Filerepo.Find(x => x.Id == id);
+            var cd = new System.Net.Mime.ContentDisposition
+            {
+                FileName = fileRecord.FileName,
+                Inline = false,
+            };
+
+            return cd.ToString();
+        }
