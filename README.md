@@ -1,3 +1,3 @@
 # Smokerstavern
 
-An online shopping store developed using C# and MVC. Payment gateway done using PayFast.
+This functionality allows you to upload and download files to and from a SQL database via LINQ to SQL.
